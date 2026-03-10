@@ -33,8 +33,11 @@ function Home() {
       <div className="flex-1 px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-center mb-6">
-            <div className="bg-gray-100 text-gray-600 text-sm px-4 py-2 rounded-full flex items-center gap-2">
-              <HiSparkles size={16} className="bg-orange-50 text-orange-600" />
+            <div className="bg-gray-100 dark:bg-slate-900 text-gray-600 dark:text-gray-300 text-sm px-4 py-2 rounded-full flex items-center gap-2">
+              <HiSparkles
+                size={16}
+                className="bg-orange-50 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300"
+              />
               AI Powered Smart Interview Platform
             </div>
           </div>
@@ -46,11 +49,11 @@ function Home() {
               className="text-4xl md:text-6xl font-semibold leading-tight max-w-4xl mx-auto text-black dark:text-white"
             >
               Practice Interviews with
-              <span className="relative inline-block">
-                <span className="bg-orange-100 text-orange-600 px-5 py-1 rounded-full">
+              <div className="relative inline-block">
+                <div className="bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 px-8 py-1 rounded-full">
                   AI Intelligence
-                </span>
-              </span>
+                </div>
+              </div>
             </motion.h1>
 
             <motion.p
@@ -74,7 +77,7 @@ function Home() {
                 }}
                 whileHover={{ opacity: 0.9, scale: 1.03 }}
                 whileTap={{ opacity: 1, scale: 0.98 }}
-                className="bg-black text-white px-10 py-3 rounded-full hover:opacity-90 transition shadow-md"
+                className="bg-orange-600 text-white px-10 py-3 rounded-full hover:opacity-90 hover:bg-orange-400 transition shadow-md"
               >
                 Start Interview
               </motion.button>
@@ -89,7 +92,7 @@ function Home() {
                 }}
                 whileHover={{ opacity: 0.9, scale: 1.03 }}
                 whileTap={{ opacity: 1, scale: 0.98 }}
-                className="border border-gray-300 px-10 py-3 rounded-full hover:bg-gray-100 transition"
+                className="border border-gray-300 dark:border-orange-600 text-gray-900 dark:text-gray-100 px-10 py-3 rounded-full hover:bg-orange-400 transition"
               >
                 View History
               </motion.button>
@@ -124,7 +127,7 @@ function Home() {
                 transition={{ duration: 0.6 + index * 0.2 }}
                 whileHover={{ rotate: 0, scale: 1.06 }}
                 className={`
-        relative bg-white rounded-3xl border-2 border-orange-100 
+        relative bg-white dark:bg-slate-900 rounded-3xl border-2 border-orange-100 dark:border-orange-900/50
         hover:border-orange-500 p-10 w-80 max-w-[90%] shadow-md hover:shadow-2xl 
         transition-all duration-300
         ${index === 0 ? "rotate-[-4deg]" : ""}
@@ -139,8 +142,10 @@ function Home() {
                   <div className="text-xs text-orange-600 font-semibold mb-2 tracking-wider">
                     {item.step}
                   </div>
-                  <h3 className="font-semibold mb-3 text-lg">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <h3 className="font-semibold mb-3 text-lg text-black dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-300 leading-relaxed">
                     {item.desc}
                   </p>
                 </div>
@@ -155,7 +160,8 @@ function Home() {
               transition={{ duration: 0.6 }}
               className="text-4xl font-semibold text-center mb-16 text-black dark:text-white"
             >
-              Advanced AI <span className="text-orange-600">Capabilities</span>
+              Advanced AI{" "}
+              <span className="text-orange-600 font-bold">Capabilities</span>
             </motion.h2>
 
             <div className="grid md:grid-cols-2 gap-10">
@@ -191,7 +197,7 @@ function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ scale: 1.02 }}
-                  className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all"
+                  className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all"
                 >
                   <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="w-full md:w-1/2 flex justify-center">
@@ -203,13 +209,13 @@ function Home() {
                     </div>
 
                     <div className="w-full md:w-1/2">
-                      <div className="bg-orange-50 text-orange-600 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+                      <div className="bg-orange-50 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 w-12 h-12 rounded-xl flex items-center justify-center mb-6">
                         {item.icon}
                       </div>
-                      <h3 className="font-semibold mb-3 text-xl">
+                      <h3 className="font-semibold mb-3 text-xl text-black dark:text-white">
                         {item.title}
                       </h3>
-                      <p className="text-gray-500 text-sm leading-relaxed">
+                      <p className="text-gray-500 dark:text-gray-300 text-sm leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
@@ -226,7 +232,8 @@ function Home() {
               transition={{ duration: 0.6 }}
               className="text-4xl font-semibold text-center mb-16 text-black dark:text-white"
             >
-              Multiple Interview <span className="text-orange-600">Modes</span>
+              Multiple Interview{" "}
+              <span className="text-orange-600 font-bold">Modes</span>
             </motion.h2>
 
             <div className="grid md:grid-cols-2 gap-10">
@@ -259,15 +266,15 @@ function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ y: -6 }}
-                  className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all"
+                  className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all"
                 >
                   <div className="flex items-center justify-between gap-6">
                     <div className="w-1/2">
-                      <h3 className="font-semibold text-xl mb-3">
+                      <h3 className="font-semibold text-xl mb-3 text-black dark:text-white">
                         {mode.title}
                       </h3>
 
-                      <p className="text-gray-500 text-sm leading-relaxed">
+                      <p className="text-gray-500 dark:text-gray-300 text-sm leading-relaxed">
                         {mode.desc}
                       </p>
                     </div>

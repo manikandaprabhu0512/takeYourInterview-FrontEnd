@@ -9,6 +9,7 @@ import { setUserData } from "./redux/userSlice";
 import InterviewPage from "./pages/InterviewPage";
 import InterviewHistory from "./pages/InterviewHistory";
 import Pricing from "./pages/Pricing";
+import AddCoupon from "./pages/AddCoupon";
 import InterviewReport from "./pages/InterviewReport";
 
 export const ServerUrl = "http://localhost:8000";
@@ -31,6 +32,8 @@ function App() {
         const result = await axios.get(ServerUrl + "/api/user/current-user", {
           withCredentials: true,
         });
+        console.log(result);
+
         dispatch(setUserData(result.data));
       } catch (error) {
         console.log(error);
@@ -46,6 +49,7 @@ function App() {
       <Route path="/interview" element={<InterviewPage />} />
       <Route path="/history" element={<InterviewHistory />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/add-coupon" element={<AddCoupon />} />
       <Route path="/report/:id" element={<InterviewReport />} />
     </Routes>
   );

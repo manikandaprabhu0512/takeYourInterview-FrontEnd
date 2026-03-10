@@ -10,10 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.5",
     "firebase": "^12.9.0",
+    "formik": "^2.4.9",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "motion": "^12.34.1",
@@ -24,7 +26,9 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.3.6",
+    "zod-formik-adapter": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
