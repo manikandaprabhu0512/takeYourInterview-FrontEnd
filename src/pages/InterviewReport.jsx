@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import axios from "axios"
-import { ServerUrl } from '../App';
-import Step3Report from '../components/Step3Report';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import Step3Report from "../components/Step3Report";
 function InterviewReport() {
-  const {id} = useParams()
-  const [report,setReport] = useState(null);
-   
-  useEffect(()=>{
+  const { id } = useParams();
+  const [report, setReport] = useState(null);
+
+  useEffect(() => {
     const fetchReport = async () => {
       try {
-        const result = await axios.get(ServerUrl + "/api/interview/report/" + id , {withCredentials:true})
+        const result = await axios.get("/api/interview/report/" + id, {
+          withCredentials: true,
+        });
 
-        console.log(result.data)
-        setReport(result.data)
+        console.log(result.data);
+        setReport(result.data);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
+    };
 
-    fetchReport()
-  },[])
+    fetchReport();
+  }, []);
 
-
-    if (!report) {
+  if (!report) {
     return (
       <div className="min-h-screen flex items-center justify-center dark:bg-[#030303] bg-gray-50">
         <p className="text-gray-500 dark:text-gray-300 text-lg">
@@ -33,7 +33,7 @@ function InterviewReport() {
     );
   }
 
-  return <Step3Report report={report}/>
+  return <Step3Report report={report} />;
 }
 
-export default InterviewReport
+export default InterviewReport;

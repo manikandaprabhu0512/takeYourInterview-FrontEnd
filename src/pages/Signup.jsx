@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { z } from "zod";
 import axios from "axios";
-import { ServerUrl } from "../App";
 
 const signupSchema = z
   .object({
@@ -48,7 +47,7 @@ export default function Signup({ onClose }) {
     onSubmit: async (values, helpers) => {
       delete values.confirmPassword;
 
-      const response = await axios.post(ServerUrl + "/api/user", values);
+      const response = await axios.post("/api/user", values);
 
       helpers.resetForm();
       window.location.reload();

@@ -12,7 +12,8 @@ import Pricing from "./pages/Pricing";
 import AddCoupon from "./pages/AddCoupon";
 import InterviewReport from "./pages/InterviewReport";
 
-export const ServerUrl = "http://localhost:8000";
+// export const ServerUrl =
+//   import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
 
 function App() {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ function App() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const result = await axios.get(ServerUrl + "/api/user/current-user", {
+        const result = await axios.get("/api/user/current-user", {
           withCredentials: true,
         });
         console.log(result);

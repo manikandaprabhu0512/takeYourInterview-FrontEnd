@@ -8,7 +8,6 @@ import { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { BsArrowRight } from "react-icons/bs";
 
 function Step2Interview({ interviewData, onFinish }) {
@@ -228,7 +227,7 @@ function Step2Interview({ interviewData, onFinish }) {
 
     try {
       const result = await axios.post(
-        ServerUrl + "/api/interview/submit-answer",
+        "/api/interview/submit-answer",
         {
           interviewId,
           questionIndex: currentIndex,
@@ -270,7 +269,7 @@ function Step2Interview({ interviewData, onFinish }) {
     try {
       if (document.fullscreenElement) document.exitFullscreen();
       const result = await axios.post(
-        ServerUrl + "/api/interview/finish",
+        "/api/interview/finish",
         { interviewId },
         { withCredentials: true },
       );

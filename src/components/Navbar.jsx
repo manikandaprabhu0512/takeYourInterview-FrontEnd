@@ -6,7 +6,6 @@ import { HiOutlineLogout } from "react-icons/hi";
 import { FaUserAstronaut } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { setUserData } from "../redux/userSlice";
 import { toggleTheme } from "../redux/themeChange";
 import AuthModel from "./AuthModel";
@@ -56,7 +55,7 @@ function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await axios.get(ServerUrl + "/api/auth/logout", {
+      await axios.get("/api/auth/logout", {
         withCredentials: true,
       });
       dispatch(setUserData(null));

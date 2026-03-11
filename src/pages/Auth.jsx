@@ -6,7 +6,6 @@ import { FcGoogle } from "react-icons/fc";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../utils/firebase";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import Login from "./Login";
@@ -24,7 +23,7 @@ function Auth({ isModel = false }) {
       let name = User.displayName;
       let email = User.email;
       const result = await axios.post(
-        ServerUrl + "/api/auth/google",
+        "/api/auth/google",
         { name, email },
         { withCredentials: true },
       );

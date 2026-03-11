@@ -5,7 +5,6 @@ import { z } from "zod";
 import { setUserData } from "../redux/userSlice";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import { ServerUrl } from "../App";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email."),
@@ -36,7 +35,7 @@ export default function Login({ onClose }) {
     },
     validate,
     onSubmit: async (values, helpers) => {
-      const response = await axios.post(ServerUrl + "/api/auth/login", values, {
+      const response = await axios.post("/api/auth/login", values, {
         withCredentials: true,
       });
       console.log(response);

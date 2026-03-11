@@ -9,7 +9,6 @@ import {
 } from "react-icons/fa";
 import { useState } from "react";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 function Step1SetUp({ onStart }) {
@@ -34,11 +33,9 @@ function Step1SetUp({ onStart }) {
     formdata.append("resume", resumeFile);
 
     try {
-      const result = await axios.post(
-        ServerUrl + "/api/interview/resume",
-        formdata,
-        { withCredentials: true },
-      );
+      const result = await axios.post("/api/interview/resume", formdata, {
+        withCredentials: true,
+      });
 
       console.log(result.data);
 
@@ -63,7 +60,7 @@ function Step1SetUp({ onStart }) {
         await document.documentElement.requestFullscreen();
       }
       const result = await axios.post(
-        ServerUrl + "/api/interview/generate-questions",
+        "/api/interview/generate-questions",
         { role, experience, mode, resumeText, projects, skills },
         { withCredentials: true },
       );

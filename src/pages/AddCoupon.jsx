@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Forbidden from "../components/Forbidden";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { ServerUrl } from "../App";
 
 export default function AddCoupon() {
   const { userData } = useSelector((state) => state.user);
@@ -25,7 +24,7 @@ export default function AddCoupon() {
     event.preventDefault();
     console.log("Form: ", form);
 
-    const response = await axios.post(ServerUrl + "/api/coupon", form, {
+    const response = await axios.post("/api/coupon", form, {
       withCredentials: true,
     });
     setForm({

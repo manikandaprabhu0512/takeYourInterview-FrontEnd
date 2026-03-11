@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { FaArrowLeft } from "react-icons/fa";
 function InterviewHistory() {
   const [interviews, setInterviews] = useState([]);
@@ -10,10 +9,9 @@ function InterviewHistory() {
   useEffect(() => {
     const getMyInterviews = async () => {
       try {
-        const result = await axios.get(
-          ServerUrl + "/api/interview/get-interview",
-          { withCredentials: true },
-        );
+        const result = await axios.get("/api/interview/get-interview", {
+          withCredentials: true,
+        });
 
         setInterviews(result.data);
       } catch (error) {

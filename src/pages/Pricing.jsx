@@ -3,7 +3,6 @@ import { FaArrowLeft, FaArrowRight, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { motion, scale } from "motion/react";
 import axios from "axios";
-import { ServerUrl } from "../App";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 function Pricing() {
@@ -66,7 +65,7 @@ function Pricing() {
     const fetchCoupons = async () => {
       setLoadingCoupons(true);
       try {
-        const response = await axios.get(ServerUrl + "/api/coupon", {
+        const response = await axios.get("/api/coupon", {
           withCredentials: true,
         });
         setAvailableCoupons(response.data || []);
@@ -86,7 +85,7 @@ function Pricing() {
 
     try {
       const response = await axios.post(
-        ServerUrl + "/api/coupon/verify",
+        "/api/coupon/verify",
         { coupon },
         { withCredentials: true },
       );
@@ -104,7 +103,7 @@ function Pricing() {
       const amount = plan.id === "basic" ? 100 : plan.id === "pro" ? 500 : 0;
 
       const result = await axios.post(
-        ServerUrl + "/api/payment/order",
+        "/api/payment/order",
         {
           planId: plan.id,
           amount: amount,
@@ -122,11 +121,9 @@ function Pricing() {
         order_id: result.data.id,
 
         handler: async function (response) {
-          const verifypay = await axios.post(
-            ServerUrl + "/api/payment/verify",
-            response,
-            { withCredentials: true },
-          );
+          const verifypay = await axios.post("/api/payment/verify", response, {
+            withCredentials: true,
+          });
           dispatch(setUserData(verifypay.data.user));
 
           alert("Payment Successful 🎉 Credits Added!");
