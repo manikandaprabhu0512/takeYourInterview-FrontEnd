@@ -28,8 +28,29 @@ function Step2Interview({ interviewData, onFinish }) {
   const [subtitle, setSubtitle] = useState("");
 
   const videoRef = useRef(null);
+  const isMicOnRef = useRef(isMicOn);
+  const isAIPlayingRef = useRef(isAIPlaying);
+  const isSubmittingRef = useRef(isSubmitting);
+  const feedbackRef = useRef(feedback);
+  const recognitionActiveRef = useRef(false);
 
   const currentQuestion = questions[currentIndex];
+
+  useEffect(() => {
+    isMicOnRef.current = isMicOn;
+  }, [isMicOn]);
+
+  useEffect(() => {
+    isAIPlayingRef.current = isAIPlaying;
+  }, [isAIPlaying]);
+
+  useEffect(() => {
+    isSubmittingRef.current = isSubmitting;
+  }, [isSubmitting]);
+
+  useEffect(() => {
+    feedbackRef.current = feedback;
+  }, [feedback]);
 
   useEffect(() => {
     const loadVoices = () => {
@@ -182,24 +203,83 @@ function Step2Interview({ interviewData, onFinish }) {
   }, [currentIndex]);
 
   useEffect(() => {
-    if (!("webkitSpeechRecognition" in window)) return;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    const recognition = new window.webkitSpeechRecognition();
+    if (!SpeechRecognition) {
+      setIsMicOn(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
     recognition.lang = "en-US";
     recognition.continuous = true;
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      recognitionActiveRef.current = true;
+    };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript;
+      let transcript = "";
 
-      setAnswer((prev) => prev + " " + transcript);
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript;
+        }
+      }
+
+      if (transcript.trim()) {
+        setAnswer((prev) => `${prev} ${transcript}`.trim());
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        setIsMicOn(false);
+      }
+    };
+
+    recognition.onend = () => {
+      recognitionActiveRef.current = false;
+
+      if (
+        isMicOnRef.current &&
+        !isAIPlayingRef.current &&
+        !isSubmittingRef.current &&
+        !feedbackRef.current
+      ) {
+        window.setTimeout(() => {
+          if (
+            recognitionRef.current &&
+            !recognitionActiveRef.current &&
+            isMicOnRef.current &&
+            !isAIPlayingRef.current
+          ) {
+            try {
+              recognitionRef.current.start();
+            } catch {}
+          }
+        }, 250);
+      }
     };
 
     recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+      recognition.abort();
+      recognitionActiveRef.current = false;
+    };
   }, []);
 
   const startMic = () => {
-    if (recognitionRef.current && !isAIPlaying) {
+    if (
+      recognitionRef.current &&
+      !isAIPlayingRef.current &&
+      !recognitionActiveRef.current
+    ) {
       try {
         recognitionRef.current.start();
       } catch {}
@@ -207,7 +287,7 @@ function Step2Interview({ interviewData, onFinish }) {
   };
 
   const stopMic = () => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && recognitionActiveRef.current) {
       recognitionRef.current.stop();
     }
   };
