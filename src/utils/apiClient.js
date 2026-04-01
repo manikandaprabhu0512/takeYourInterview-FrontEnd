@@ -1,13 +1,12 @@
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.VITE_SERVER_URL;
 const WAKE_SERVER_URL = import.meta.env.VITE_WAKE_SERVER_URL;
 const WAKE_UI_DURATION_SECONDS = 90;
 
 console.log("API File loaded");
 
 export const api = axios.create({
-  baseURL: BACKEND_URL,
+  baseURL: "/api",
   timeout: 5000,
 });
 

@@ -31,7 +31,7 @@ function App() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const result = await api.get("/api/user/current-user", {
+        const result = await api.get("/user/current-user", {
           withCredentials: true,
         });
         console.log(result);
