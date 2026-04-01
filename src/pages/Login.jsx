@@ -30,8 +30,8 @@ export default function Login({ onClose }) {
 
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      email: "admin@takeyourinterview.com",
+      password: "admin@takeyourinterview.com",
     },
     validate,
     onSubmit: async (values, helpers) => {
