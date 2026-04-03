@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://takeyourinterview-ags-1-682670051.ap-south-1.elb.amazonaws.com/api/:path*"
+      "destination": "https://takeyourinterview-app-production.up.railway.app/api/:path*"
     }
   ]
 }
