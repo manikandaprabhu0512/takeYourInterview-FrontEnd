@@ -15,30 +15,40 @@ function Step2Interview({ interviewData, onFinish }) {
   const [isIntroPhase, setIsIntroPhase] = useState(true);
 
   const [isMicOn, setIsMicOn] = useState(true);
-  const recognitionRef = useRef(null);
   const [isAIPlaying, setIsAIPlaying] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
   const [timeLeft, setTimeLeft] = useState(questions[0]?.timeLimit || 60);
-  const [selectedVoice, setSelectedVoice] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [voiceGender, setVoiceGender] = useState("female");
   const [subtitle, setSubtitle] = useState("");
 
   const videoRef = useRef(null);
+  const audioRef = useRef(null);
   const isMicOnRef = useRef(isMicOn);
+  const answerRef = useRef(answer);
   const isAIPlayingRef = useRef(isAIPlaying);
   const isSubmittingRef = useRef(isSubmitting);
   const feedbackRef = useRef(feedback);
-  const recognitionActiveRef = useRef(false);
+  const mediaStreamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const recordingChunksRef = useRef([]);
+  const recordingActiveRef = useRef(false);
+  const suppressMicRestartRef = useRef(false);
+  const pendingStopResolveRef = useRef(null);
+  const transcribeQueueRef = useRef(Promise.resolve());
 
   const currentQuestion = questions[currentIndex];
 
   useEffect(() => {
     isMicOnRef.current = isMicOn;
   }, [isMicOn]);
+
+  useEffect(() => {
+    answerRef.current = answer;
+  }, [answer]);
 
   useEffect(() => {
     isAIPlayingRef.current = isAIPlaying;
@@ -52,103 +62,75 @@ function Step2Interview({ interviewData, onFinish }) {
     feedbackRef.current = feedback;
   }, [feedback]);
 
-  useEffect(() => {
-    const loadVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (!voices.length) return;
-
-      // Try known female voices first
-      const femaleVoice = voices.find(
-        (v) =>
-          v.name.toLowerCase().includes("zira") ||
-          v.name.toLowerCase().includes("samantha") ||
-          v.name.toLowerCase().includes("female"),
-      );
-
-      if (femaleVoice) {
-        setSelectedVoice(femaleVoice);
-        setVoiceGender("female");
-        return;
-      }
-
-      // Try known male voices
-      const maleVoice = voices.find(
-        (v) =>
-          v.name.toLowerCase().includes("david") ||
-          v.name.toLowerCase().includes("mark") ||
-          v.name.toLowerCase().includes("male"),
-      );
-
-      if (maleVoice) {
-        setSelectedVoice(maleVoice);
-        setVoiceGender("male");
-        return;
-      }
-
-      // Fallback: first voice (assume female)
-      setSelectedVoice(voices[0]);
-      setVoiceGender("female");
-    };
-
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-  }, []);
-
   const videoSource = voiceGender === "male" ? maleVideo : femaleVideo;
+  const openAiVoice = voiceGender === "male" ? "onyx" : "coral";
 
   /* ---------------- SPEAK FUNCTION ---------------- */
   const speakText = (text) => {
-    return new Promise((resolve) => {
-      if (!window.speechSynthesis || !selectedVoice) {
-        resolve();
-        return;
-      }
+    return new Promise(async (resolve) => {
+      let audioUrl;
 
-      window.speechSynthesis.cancel();
-
-      // Add natural pauses after commas and periods
-      const humanText = text.replace(/,/g, ", ... ").replace(/\./g, ". ... ");
-
-      const utterance = new SpeechSynthesisUtterance(humanText);
-
-      utterance.voice = selectedVoice;
-
-      // Human-like pacing
-      utterance.lang = "en-US";
-      utterance.rate = 0.92; // slightly slower than normal
-      utterance.pitch = 1.05; // small warmth
-      utterance.volume = 1;
-
-      utterance.onstart = () => {
-        setIsAIPlaying(true);
-        stopMic();
-        videoRef.current?.play();
-      };
-
-      utterance.onend = () => {
+      const finishSpeaking = () => {
         videoRef.current?.pause();
-        videoRef.current.currentTime = 0;
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+        }
+        isAIPlayingRef.current = false;
         setIsAIPlaying(false);
 
-        if (isMicOn) {
+        if (isMicOnRef.current) {
           startMic();
         }
-        setTimeout(() => {
+
+        window.setTimeout(() => {
           setSubtitle("");
+          if (audioUrl) {
+            URL.revokeObjectURL(audioUrl);
+          }
           resolve();
         }, 300);
       };
 
-      setSubtitle(text);
+      try {
+        audioRef.current?.pause();
+        isAIPlayingRef.current = true;
+        setIsAIPlaying(true);
+        await stopMic({ restart: false });
+        setSubtitle(text);
 
-      window.speechSynthesis.speak(utterance);
+        const response = await axios.post(
+          "/api/tts/speech",
+          {
+            text,
+            voice: openAiVoice,
+            instructions:
+              "Speak like a warm, professional AI interviewer. Use natural pauses, clear pronunciation, and a supportive tone.",
+          },
+          {
+            responseType: "blob",
+            withCredentials: true,
+          },
+        );
+
+        audioUrl = URL.createObjectURL(response.data);
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        audio.onplay = () => {
+          videoRef.current?.play();
+        };
+        audio.onended = finishSpeaking;
+        audio.onerror = finishSpeaking;
+
+        await audio.play();
+      } catch (error) {
+        console.log(error);
+        finishSpeaking();
+      }
     });
   };
 
   useEffect(() => {
-    if (!selectedVoice) {
-      return;
-    }
     const runIntro = async () => {
       if (isIntroPhase) {
         await speakText(
@@ -177,7 +159,7 @@ function Step2Interview({ interviewData, onFinish }) {
     };
 
     runIntro();
-  }, [selectedVoice, isIntroPhase, currentIndex]);
+  }, [isIntroPhase, currentIndex]);
 
   useEffect(() => {
     if (isIntroPhase) return;
@@ -202,98 +184,129 @@ function Step2Interview({ interviewData, onFinish }) {
     }
   }, [currentIndex]);
 
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+  const transcribeAudio = (audioBlob) => {
+    if (!audioBlob?.size) return;
 
-    if (!SpeechRecognition) {
-      setIsMicOn(false);
+    transcribeQueueRef.current = transcribeQueueRef.current
+      .then(async () => {
+        const formData = new FormData();
+        const extension = audioBlob.type.includes("mp4") ? "mp4" : "webm";
+        formData.append("audio", audioBlob, `answer.${extension}`);
+
+        const result = await axios.post("/api/stt/transcribe", formData, {
+          withCredentials: true,
+        });
+
+        const transcript = result.data?.text;
+        if (transcript?.trim()) {
+          setAnswer((prev) => {
+            const nextAnswer = `${prev} ${transcript}`.trim();
+            answerRef.current = nextAnswer;
+            return nextAnswer;
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const getSupportedMimeType = () => {
+    const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+    return types.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+  };
+
+  const startMic = async () => {
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      !window.MediaRecorder ||
+      isAIPlayingRef.current ||
+      recordingActiveRef.current
+    ) {
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    try {
+      const stream =
+        mediaStreamRef.current ||
+        (await navigator.mediaDevices.getUserMedia({ audio: true }));
+      mediaStreamRef.current = stream;
 
-    recognition.onstart = () => {
-      recognitionActiveRef.current = true;
-    };
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      recordingChunksRef.current = [];
 
-    recognition.onresult = (event) => {
-      let transcript = "";
+      recorder.onstart = () => {
+        recordingActiveRef.current = true;
+      };
 
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        if (event.results[i].isFinal) {
-          transcript += event.results[i][0].transcript;
+      recorder.ondataavailable = (event) => {
+        if (event.data?.size) {
+          recordingChunksRef.current.push(event.data);
         }
-      }
+      };
 
-      if (transcript.trim()) {
-        setAnswer((prev) => `${prev} ${transcript}`.trim());
-      }
-    };
+      recorder.onstop = () => {
+        recordingActiveRef.current = false;
+        const audioBlob = new Blob(recordingChunksRef.current, {
+          type: recorder.mimeType || "audio/webm",
+        });
+        recordingChunksRef.current = [];
 
-    recognition.onerror = (event) => {
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        setIsMicOn(false);
-      }
-    };
+        if (audioBlob.size) {
+          transcribeAudio(audioBlob);
+        }
 
-    recognition.onend = () => {
-      recognitionActiveRef.current = false;
+        const shouldRestart =
+          !suppressMicRestartRef.current &&
+          isMicOnRef.current &&
+          !isAIPlayingRef.current &&
+          !isSubmittingRef.current &&
+          !feedbackRef.current;
 
-      if (
-        isMicOnRef.current &&
-        !isAIPlayingRef.current &&
-        !isSubmittingRef.current &&
-        !feedbackRef.current
-      ) {
-        window.setTimeout(() => {
-          if (
-            recognitionRef.current &&
-            !recognitionActiveRef.current &&
-            isMicOnRef.current &&
-            !isAIPlayingRef.current
-          ) {
-            try {
-              recognitionRef.current.start();
-            } catch {}
-          }
-        }, 250);
-      }
-    };
+        suppressMicRestartRef.current = false;
 
-    recognitionRef.current = recognition;
+        if (pendingStopResolveRef.current) {
+          const resolve = pendingStopResolveRef.current;
+          pendingStopResolveRef.current = null;
+          transcribeQueueRef.current.finally(resolve);
+        }
 
-    return () => {
-      recognition.stop();
-      recognition.abort();
-      recognitionActiveRef.current = false;
-    };
-  }, []);
+        if (shouldRestart) {
+          window.setTimeout(() => {
+            startMic();
+          }, 250);
+        }
+      };
 
-  const startMic = () => {
-    if (
-      recognitionRef.current &&
-      !isAIPlayingRef.current &&
-      !recognitionActiveRef.current
-    ) {
-      try {
-        recognitionRef.current.start();
-      } catch {}
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+    } catch (error) {
+      console.log(error);
+      setIsMicOn(false);
     }
   };
 
-  const stopMic = () => {
-    if (recognitionRef.current && recognitionActiveRef.current) {
-      recognitionRef.current.stop();
+  const stopMic = ({ restart = true } = {}) => {
+    suppressMicRestartRef.current = !restart;
+
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      const stopped = new Promise((resolve) => {
+        pendingStopResolveRef.current = resolve;
+      });
+      mediaRecorderRef.current.stop();
+      return stopped.then(() => transcribeQueueRef.current);
     }
+
+    suppressMicRestartRef.current = false;
+    return transcribeQueueRef.current;
   };
   const toggleMic = () => {
     if (isMicOn) {
-      stopMic();
+      stopMic({ restart: false });
     } else {
       startMic();
     }
@@ -302,8 +315,10 @@ function Step2Interview({ interviewData, onFinish }) {
 
   const submitAnswer = async () => {
     if (isSubmitting) return;
-    stopMic();
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
+    await stopMic({ restart: false });
+    await transcribeQueueRef.current;
 
     try {
       const result = await axios.post(
@@ -311,7 +326,7 @@ function Step2Interview({ interviewData, onFinish }) {
         {
           interviewId,
           questionIndex: currentIndex,
-          answer,
+          answer: answerRef.current,
           timeTaken: currentQuestion.timeLimit - timeLeft,
         },
         { withCredentials: true },
@@ -327,6 +342,7 @@ function Step2Interview({ interviewData, onFinish }) {
   };
 
   const handleNext = async () => {
+    answerRef.current = "";
     setAnswer("");
     setFeedback("");
 
@@ -344,7 +360,7 @@ function Step2Interview({ interviewData, onFinish }) {
   };
 
   const finishInterview = async () => {
-    stopMic();
+    await stopMic({ restart: false });
     setIsMicOn(false);
     try {
       if (document.fullscreenElement) document.exitFullscreen();
@@ -372,12 +388,10 @@ function Step2Interview({ interviewData, onFinish }) {
 
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-        recognitionRef.current.abort();
-      }
+      stopMic({ restart: false });
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
 
-      window.speechSynthesis.cancel();
+      audioRef.current?.pause();
     };
   }, []);
 
@@ -473,7 +487,10 @@ function Step2Interview({ interviewData, onFinish }) {
           )}
           <textarea
             placeholder="Type your answer here..."
-            onChange={(e) => setAnswer(e.target.value)}
+            onChange={(e) => {
+              answerRef.current = e.target.value;
+              setAnswer(e.target.value);
+            }}
             disabled={timeLeft === 0}
             value={answer}
             className={`flex-1 bg-gray-100 dark:bg-slate-800 p-4 sm:p-6 rounded-2xl resize-none outline-none border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500 transition text-gray-800 dark:text-gray-100 ${timeLeft === 0 || isSubmitting || !!feedback ? "opacity-50 cursor-not-allowed" : "opacity-100"}`}
