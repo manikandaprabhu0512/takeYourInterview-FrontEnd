@@ -231,12 +231,40 @@ function Step2Interview({ interviewData, onFinish }) {
   };
 
   const isMicDisabled = isAIPlayingRef.current || isSubmitting || !!feedback;
+  const aiStatus = isAIPlaying
+    ? "AI speaking"
+    : isSubmitting
+      ? "AI processing"
+      : "AI waiting";
+  const userStatus = isSubmitting
+    ? "Processing answer"
+    : isMicOn && !isMicDisabled
+      ? "Listening"
+      : isMicOn
+        ? "Mic paused"
+        : "Mic off";
+  const promptLabel = followUpCount
+    ? `Follow-up ${followUpCount} of ${maxFollowUps}`
+    : `Question ${currentIndex + 1} of ${questions.length}`;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 via-white to-orange-100 dark:from-[#030303] dark:via-slate-900 dark:to-slate-800 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-350 min-h-[80vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col lg:flex-row overflow-hidden">
-        <div className="w-full lg:w-[35%] bg-white dark:bg-slate-900 flex flex-col items-center p-6 space-y-6 border-r border-gray-200 dark:border-gray-700">
-          <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-xl">
+    <div className="min-h-screen bg-[#05223e] flex items-center justify-center p-4 sm:p-6 text-white">
+      <div className="w-full max-w-5xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-100">
+          AI Smart Interview
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div
+            className={`relative min-h-60 rounded-2xl bg-[#16486a] border-2 shadow-xl overflow-hidden ${
+              isAIPlaying || isSubmitting
+                ? "border-orange-400"
+                : "border-gray-400/80"
+            }`}
+          >
+            <div className="absolute left-4 top-4 rounded-full bg-black/25 px-3 py-1 text-xs font-semibold text-gray-100">
+              {aiStatus}
+            </div>
             <video
               src={videoSource}
               key={videoSource}
@@ -244,137 +272,82 @@ function Step2Interview({ interviewData, onFinish }) {
               muted
               playsInline
               preload="auto"
-              className="w-full h-auto object-cover"
+              className="h-full w-full object-cover opacity-80"
             />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/15"></div>
           </div>
 
-          {subtitle && (
-            <div className="w-full max-w-md bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm">
-              <p className="text-gray-700 dark:text-gray-200 text-sm sm:text-base font-medium text-center leading-relaxed">
-                {subtitle}
-              </p>
+          <div
+            className={`relative min-h-60 rounded-2xl bg-[#16486a] border-2 shadow-xl ${
+              isMicOn && !isMicDisabled
+                ? "border-emerald-400"
+                : "border-gray-400/80"
+            }`}
+          >
+            <div className="absolute left-4 top-4 rounded-full bg-black/25 px-3 py-1 text-xs font-semibold text-gray-100">
+              {userStatus}
             </div>
-          )}
-
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-6 space-y-5">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500 dark:text-gray-300">
-                Interview Status
-              </span>
-              {isAIPlaying && (
-                <span className="text-sm font-semibold text-orange-600">
-                  AI Speaking
-                </span>
-              )}
+            <div className="absolute right-4 top-4 rounded-full bg-black/25 px-3 py-1 text-xs font-semibold text-gray-100">
+              Q {currentIndex + 1}/{questions.length}
             </div>
-
-            <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-            <div className="text-center">
-              <span className="text-3xl font-bold text-orange-600">
-                {followUpCount}
-              </span>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                Follow-up questions asked
-              </p>
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                Maximum {maxFollowUps} per main question
-              </p>
-            </div>
-
-            <div className="h-px bg-gray-200 dark:bg-gray-700" />
-
-            <div className="grid grid-cols-2 gap-6 text-center">
-              <div>
-                <span className="text-2xl font-bold text-orange-600">
-                  {currentIndex + 1}
-                </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  Current Questions
-                </span>
-              </div>
-
-              <div>
-                <span className="text-2xl font-bold text-orange-600">
-                  {questions.length}
-                </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  Total Questions
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 relative text-gray-900 dark:text-gray-100">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
-            AI Smart Interview
-          </h2>
-
-          {!isIntroPhase && (
-            <div className="relative mb-6 bg-gray-50 dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
-              <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 mb-2">
-                {followUpCount
-                  ? `Follow-up ${followUpCount} of ${maxFollowUps}`
-                  : `Question ${currentIndex + 1} of ${questions.length}`}
-              </p>
-
-              <div className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white leading-relaxed ">
-                {currentAiPrompt || currentQuestion?.question}
-              </div>
-            </div>
-          )}
-
-          <textarea
-            placeholder="Type your answer here..."
-            onChange={(event) => setAnswer(event.target.value)}
-            disabled={isSubmitting || !!feedback}
-            value={answer}
-            className={`flex-1 bg-gray-100 dark:bg-slate-800 p-4 sm:p-6 rounded-2xl resize-none outline-none border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-orange-500 transition text-gray-800 dark:text-gray-100 ${isSubmitting || !!feedback ? "opacity-50 cursor-not-allowed" : "opacity-100"}`}
-          />
-
-          {!feedback ? (
-            <div className="flex items-center gap-4 mt-6">
+            <div className="flex h-full min-h-60 flex-col items-center justify-center gap-5 p-6 text-center">
               <motion.button
                 onClick={toggleMic}
                 disabled={isMicDisabled}
                 whileTap={{ scale: 0.9 }}
-                className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-black text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-black/35 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isMicOn ? (
-                  <FaMicrophone size={20} />
+                  <FaMicrophone size={22} />
                 ) : (
-                  <FaMicrophoneSlash size={20} />
+                  <FaMicrophoneSlash size={22} />
                 )}
               </motion.button>
-
-              <motion.button
-                onClick={submitAnswer}
-                disabled={isSubmitting}
-                whileTap={{ scale: 0.95 }}
-                className="flex-1 bg-linear-to-r from-orange-600 to-orange-500 text-white py-3 sm:py-4 rounded-2xl shadow-lg hover:opacity-90 transition font-semibold disabled:bg-gray-500"
-              >
-                {isSubmitting
-                  ? "Processing..."
-                  : followUpCount < maxFollowUps
-                    ? "Continue"
-                    : "Evaluate Answer"}
-              </motion.button>
             </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-6 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-5 rounded-2xl shadow-sm"
-            >
-              <p className="text-orange-700 dark:text-orange-300 font-medium mb-4">
-                {feedback}
-              </p>
-              <p className="text-sm text-orange-600 dark:text-orange-300">
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-[#16486a] border-2 border-gray-400/80 shadow-xl p-5 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-200">
+            <span>{isIntroPhase ? "Preparing interview" : promptLabel}</span>
+            <span>
+              Follow-ups {followUpCount}/{maxFollowUps}
+            </span>
+          </div>
+
+          <div className="mb-4 rounded-xl bg-black/20 p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-300">
+              AI prompt
+            </p>
+            <p className="text-base sm:text-lg font-semibold leading-relaxed text-white">
+              {feedback ||
+                subtitle ||
+                currentAiPrompt ||
+                currentQuestion?.question ||
+                "Getting ready..."}
+            </p>
+            {feedback && (
+              <p className="mt-3 text-sm text-orange-200">
                 Moving ahead automatically...
               </p>
-            </motion.div>
-          )}
+            )}
+          </div>
+
+          {/* <textarea
+            placeholder={
+              isMicOn
+                ? "Listening... your transcript will appear after you pause."
+                : "Mic is off. Type your answer here or turn the mic on."
+            }
+            onChange={(event) => setAnswer(event.target.value)}
+            disabled={isSubmitting || !!feedback}
+            value={answer}
+            className={`min-h-32 w-full resize-none rounded-xl border border-gray-300/70 bg-black/20 p-4 text-base text-white outline-none transition placeholder:text-gray-300 focus:ring-2 focus:ring-orange-400 ${
+              isSubmitting || !!feedback
+                ? "opacity-60 cursor-not-allowed"
+                : "opacity-100"
+            }`}
+          /> */}
         </div>
       </div>
     </div>
