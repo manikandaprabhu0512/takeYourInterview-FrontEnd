@@ -9,6 +9,7 @@ import axios from "axios";
 import { setUserData } from "../redux/userSlice";
 import { toggleTheme } from "../redux/themeChange";
 import AuthModel from "./AuthModel";
+import BorderAnimatedButton from "./AnimatedButton";
 function Navbar() {
   const { userData } = useSelector((state) => state.user);
   const isAdmin = userData?.role === "ADMIN";
@@ -186,6 +187,18 @@ function Navbar() {
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="relative">
+            <BorderAnimatedButton
+              onClick={() => {
+                if (!userData) {
+                  setShowAuth(true);
+                  return;
+                }
+                navigate("/marginal");
+              }}
+            />
           </div>
         </div>
       </motion.div>

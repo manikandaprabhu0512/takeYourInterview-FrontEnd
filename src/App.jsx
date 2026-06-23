@@ -11,6 +11,8 @@ import InterviewHistory from "./pages/InterviewHistory";
 import Pricing from "./pages/Pricing";
 import AddCoupon from "./pages/AddCoupon";
 import InterviewReport from "./pages/InterviewReport";
+import NotebookLM_Dashboard from "./pages/NotebookLM_Dashboard";
+import NotebookPage from "./pages/Workspace";
 
 // export const ServerUrl =
 //   import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
@@ -121,6 +123,8 @@ function App() {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/add-coupon" element={<AddCoupon />} />
       <Route path="/report/:id" element={<InterviewReport />} />
+      <Route path="/marginal/:id" element={<NotebookPage />} />
+      <Route path="/marginal" element={<NotebookLM_Dashboard />} />
     </Routes>
   );
 }

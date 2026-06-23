@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://takeyourinterview-app-production.up.railway.app",
+        target: "https://takeyourinterview-app.onrender.com",
         changeOrigin: true,
         secure: false,
       },
