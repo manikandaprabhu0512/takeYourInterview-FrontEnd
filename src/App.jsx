@@ -46,9 +46,12 @@ function App() {
 
     const healthCheck = async () => {
       try {
-        const response = await axios.get("/api/health");
+        const [healthResponse, backendResponse] = await Promise.all([
+          axios.get("/api/health"),
+          axios.get("https://marginal-backend-s979.onrender.com/health"),
+        ]);
 
-        if (response.status === 200) {
+        if (healthResponse.status === 200 && backendResponse.status === 200) {
           setIsServerStarting(false);
         }
       } catch (error) {
