@@ -69,13 +69,14 @@ function App() {
           withCredentials: true,
         });
         dispatch(setUserData(result.data));
+        console.log("User: ", result.data);
       } catch (error) {
         console.log(error);
         dispatch(setUserData(null));
       }
     };
     getUser();
-  }, [dispatch]);
+  }, [dispatch, isServerStarting]);
 
   if (isServerStarting) {
     const progress = ((60 - startupSecondsLeft) / 60) * 100;
