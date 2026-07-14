@@ -36,6 +36,9 @@ export default function Signup({ onClose }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  console.log("ShowConfirm: ", showConfirmPassword);
+  console.log("ShowPassword: ", showPassword);
+
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -160,7 +163,7 @@ export default function Signup({ onClose }) {
               value={formik.values.confirmPassword}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 pr-10 text-sm text-gray-900 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 dark:border-gray-700 dark:bg-slate-900 dark:text-white"
             />
 
