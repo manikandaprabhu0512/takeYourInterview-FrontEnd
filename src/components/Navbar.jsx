@@ -188,18 +188,6 @@ function Navbar() {
               </div>
             )}
           </div>
-
-          <div className="relative">
-            <BorderAnimatedButton
-              onClick={() => {
-                if (!userData) {
-                  setShowAuth(true);
-                  return;
-                }
-                navigate("/marginal");
-              }}
-            />
-          </div>
         </div>
       </motion.div>
 
